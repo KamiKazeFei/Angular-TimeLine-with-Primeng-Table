@@ -1,4 +1,4 @@
-#Description
+# Description
 This is a very simple Angular component. 
 I have created a basic timeline functionality using the PrimeNG Table package. 
 The operation is straightforward - you just need to determine the starting point, drag the mouse, and release it to create a time event. 
