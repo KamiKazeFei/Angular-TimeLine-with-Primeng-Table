@@ -1,0 +1,113 @@
+<div class="grid">
+  <!-- 確定可顯示時間軸選項不為0 -->
+  <ng-container *ngIf="timeAxisOptions.length > 0 && meetingRoom.length > 0">
+    <!-- 切換時間軸 -->
+    <div class="col-2">
+      <label style="font-size: 22px;">{{'時間軸'}}</label>
+      <select pInputText [(ngModel)]="selectedStep" (ngModelChange)="changeSelectedTimeAxis()" style="font-size: 22px;">
+        <option [ngValue]="15" [label]="'15分鐘'"></option>
+        <option [ngValue]="30" [label]="'30分鐘'"></option>
+        <option [ngValue]="60" [label]="'60分鐘'"></option>
+      </select>
+    </div>
+    <!-- 顯示Table -->
+    <div class="col-12">
+      <p-table #table [value]="meetinRoomArray" [columns]="timeAxisOptions" (mouseleave)="endSelectingBorrowTime()"
+        [style]="{'width':(timeLineTableMaxwidth - 7) + 'px','max-width': '99.5%','border':'1px solid black'}"
+        [scrollHeight]="'400px'" frozenWidth="380px" [scrollable]="true" class="unselectable">
+        <!-- 標題 -->
+        <ng-template pTemplate="header" let-columns>
+          <tr>
+            <th pFrozenColumn style="min-width: 330px;border-right: 2.5px solid;height: 71px;background: white;">
+              <label>{{'過濾會議室'}}</label>
+              <input pInputText type="text" (input)="table.filter($event.target['value'], 'content', 'contains')">
+            </th>
+            <th class="header" *ngFor="let col of columns" style="text-align: center;">
+              {{col.startHeader}}<br>{{'~'}}<br>{{col.endHeader}}
+            </th>
+          </tr>
+        </ng-template>
+        <!-- 會議室列表 -->
+        <ng-template pTemplate="body" let-data let-columns="columns">
+          <tr>
+            <td class="unselectable" pFrozenColumn
+              style="border: 1px solid lightgray;padding: 3px;z-index: 1;width: 330px;height: 46px;border-right: 2.5px solid;background: white;">
+              <div style="display: flex;;width: 100%;">
+                <!-- 會議室名稱 -->
+                <label style="font-size: 13px;font-weight: 700;margin-bottom: 0px;">
+                  {{data.content}}
+                </label>
+              </div>
+            </td>
+            <td *ngFor="let col of columns;" [id]="data.content + '_' + col.field" [style]="{
+                       'padding':'0px',
+                       'width':tableCellWidth,
+                       'border-top':'1px solid lightgray',
+                       'border-bottom':'1px solid lightgray',
+                       'min-width':tableCellWidth,
+                       'max-width':tableCellWidth,
+                       'overflow':'hidden',
+                       'height':'46px',
+                       'border-left':col[data.content + '_' + col.field + '_left_border'],
+                       'border-right':col[data.content + '_' + col.field + '_right_border']
+                    }" (mousedown)="!hold ? startSelectBorrowTime(data,col.field) : null"
+              (mouseenter)="hold ? selectingBorrowTime(data,col.field) : null"
+              (mouseup)="hold ? endSelectingBorrowTime() : null">
+              <!-- 1 -->
+              <ng-container
+                *ngIf="(col[data.content + '_' + col.field] == 1) || (col[data.content + '_' + col.field] == 0 && data['new'])">
+                <div [ngStyle]="{
+                                  'display':'flex','align-items':'center','width':col[data.content + '_' + col.field + '_width'],
+                                  'max-width':tableCellWidth,'height':'43px','padding':'7px', 'z-index':'1',
+                                  'background': (hold ? setBackground(data,col.field) : col[data.content + '_' + col.field + '_background']),
+                                  'border-top-left-radius': col[data.content + '_' + col.field + '_left_radius'],
+                                  'border-bottom-left-radius':col[data.content + '_' + col.field + '_left_radius'],
+                                  'border-top-right-radius':col[data.content + '_' + col.field + '_right_radius'],
+                                  'border-bottom-right-radius': col[data.content + '_' + col.field + '_right_radius'],
+                                  'margin-left':col[data.content + '_' + col.field + '_margin_left']
+                                  }" [pTooltip]="col[data.content + '_' + col.field + '_tooltips']"
+                  [tooltipPosition]="'top'" [tooltipDisabled]="hold">
+                </div>
+              </ng-container>
+              <!-- 2 or up -->
+              <ng-container *ngIf="col[data.content + '_' + col.field] >= 2">
+                <ng-container *ngFor="let detail of col[data.content + '_' + col.field + '_array'];let i = index">
+                  <div [ngStyle]="{
+                             'display':'flex','align-items':'center','float':(i == 0 || col[data.content + '_' + col.field] > 2 ? 'left' : ''),
+                             'max-width':tableCellWidth,'height':'43px','padding':'4px','z-index':'1',
+                             'background':col[data.content + '_' + col.field + '_background_' + (i + 1).toString()],
+                             'border-top-right-radius':col[data.content + '_' + col.field + '_right_radius_' + (i + 1).toString()],
+                             'border-bottom-right-radius': col[data.content + '_' + col.field + '_right_radius_' + (i + 1).toString()],
+                             'border-top-left-radius':col[data.content + '_' + col.field + '_left_radius_' + (i + 1).toString()],
+                             'border-bottom-left-radius':col[data.content + '_' + col.field + '_left_radius_' + (i + 1).toString()],
+                             'margin-left':col[data.content + '_' + col.field + '_margin_left_' + (i + 1).toString()],
+                             'width': col[data.content + '_' + col.field + '_width_' + (i + 1).toString()]
+                             }" [pTooltip]="col[data.content + '_' + col.field + '_tooltips_' + (i + 1).toString()]"
+                    [tooltipPosition]="'top'">
+                  </div>
+                </ng-container>
+              </ng-container>
+            </td>
+          </tr>
+        </ng-template>
+        <!-- 查無會議室 -->
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td [colSpan]="timeAxisOptions.length + 1">
+              {{'查無可借用會議室'}}
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </ng-container>
+  <!-- 查無資料 -->
+  <ng-container *ngIf="timeAxisOptions.length === 0 || meetingRoom.length === 0">
+    <div class="col-12" style="display: flex;justify-content: center;align-items: center;">
+      <label style="font-size: 40px;" *ngIf="meetingRoom.length === 0">
+        {{'無會議室可列出'}}
+      </label>
+      <hr>
+    </div>
+  </ng-container>
+</div>

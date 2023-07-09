@@ -1,0 +1,41 @@
+.p-inputtext {
+  width: 95%;
+  padding: 7px;
+  border-radius: 5px;
+  border: 1px solid lightgray;
+}
+
+.unselectable {
+  user-select: none;
+}
+
+.header {
+  padding: 5px !important;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+  justify-content: center;
+  height: 37px;
+  min-width: 59px;
+  max-width: 59px;
+}
+
+:host .frozenHeader {
+  min-width: 330px;
+  border-right: 2.5px solid;
+  height: 71px;
+}
+
+:host .meetingRoomHeader {
+  border: 1px solid lightgray;
+  padding: 3px;
+  z-index: 99;
+  width: 330px;
+  height: 46px;
+  border-right: 2.5px solid;
+  background: white;
+}
+
+::ng-deep .p-datatable-scrollable .p-frozen-column {
+  position: unset !important;
+  background: inherit;
+}
